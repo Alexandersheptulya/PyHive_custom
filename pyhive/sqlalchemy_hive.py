@@ -128,8 +128,6 @@ _type_map = {
     'float': types.Float,
     'double': types.Float,
     'string': types.String,
-    'varchar': types.String,
-    'char': types.String,
     'date': HiveDate,
     'timestamp': HiveTimestamp,
     'binary': types.String,
@@ -228,8 +226,8 @@ class HiveExecutionContext(default.DefaultExecutionContext):
 
 
 class HiveDialect(default.DefaultDialect):
-    name = 'hive'
-    driver = 'thrift'
+    name = b'hive'
+    driver = b'thrift'
     execution_ctx_cls = HiveExecutionContext
     preparer = HiveIdentifierPreparer
     statement_compiler = HiveCompiler
@@ -246,7 +244,6 @@ class HiveDialect(default.DefaultDialect):
     description_encoding = None
     supports_multivalues_insert = True
     type_compiler = HiveTypeCompiler
-    supports_sane_rowcount = False
 
     @classmethod
     def dbapi(cls):
@@ -374,29 +371,3 @@ class HiveDialect(default.DefaultDialect):
     def _check_unicode_description(self, connection):
         # We decode everything as UTF-8
         return True
-
-
-class HiveHTTPDialect(HiveDialect):
-
-    name = "hive"
-    scheme = "http"
-    driver = "rest"
-
-    def create_connect_args(self, url):
-        kwargs = {
-            "host": url.host,
-            "port": url.port or 10000,
-            "scheme": self.scheme,
-            "username": url.username or None,
-            "password": url.password or None,
-        }
-        if url.query:
-            kwargs.update(url.query)
-            return [], kwargs
-        return ([], kwargs)
-
-
-class HiveHTTPSDialect(HiveHTTPDialect):
-
-    name = "hive"
-    scheme = "https"
